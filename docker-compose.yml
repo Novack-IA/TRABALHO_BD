@@ -1,0 +1,22 @@
+# Versão do Docker Compose
+version: '3.8'
+
+# Seção de definição dos serviços
+services:
+  # Banco de Dados Único: PostgreSQL com a extensão pgvector
+  postgres-db:
+    # Usamos uma imagem que já inclui o pgvector. A tag :pg16 significa PostgreSQL 16.
+    image: pgvector/pgvector:pg16
+    container_name: bookcrossing_postgres_vector
+    environment:
+      POSTGRES_DB: book_crossing_db
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+# Seção para gerenciar os volumes de dados persistentes
+volumes:
+  postgres_data:

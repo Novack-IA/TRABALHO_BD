@@ -1,0 +1,39 @@
+-- Ativa a extensão pgvector para esta base de dados.
+-- Execute este comando apenas uma vez!
+CREATE EXTENSION IF NOT EXISTS vector;
+
+-- Tabela para armazenar os usuários
+CREATE TABLE Usuarios (
+    id_usuario INT PRIMARY KEY,
+    localizacao VARCHAR(255),
+    idade NUMERIC -- Usamos NUMERIC para lidar com valores nulos ou "NaN"
+);
+
+-- Tabela para armazenar os livros
+CREATE TABLE Livros (
+    isbn VARCHAR(13) PRIMARY KEY,
+    titulo TEXT, -- TEXT para títulos longos
+    autor VARCHAR(255),
+    ano_publicacao INT,
+    editora VARCHAR(255),
+    -- Coluna de Embedding (vetor). A dimensão 384 é um padrão comum
+    -- para modelos de linguagem. Deixaremos nula por enquanto.
+    embedding vector(384)
+);
+
+-- Tabela para armazenar as avaliações, ligando usuários e livros
+CREATE TABLE Avaliacoes (
+    id_avaliacao SERIAL PRIMARY KEY, -- Cria um ID auto-incremental
+    id_usuario INT,
+    isbn_livro VARCHAR(13),
+    avaliacao INT,
+
+    -- Define as chaves estrangeiras para garantir a integridade dos dados
+    CONSTRAINT fk_usuario
+        FOREIGN KEY(id_usuario)
+        REFERENCES Usuarios(id_usuario),
+
+    CONSTRAINT fk_livro
+        FOREIGN KEY(isbn_livro)
+        REFERENCES Livros(isbn)
+);
