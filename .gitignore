@@ -1,6 +1,8 @@
 venv/
 app.py
 app2.py
-
+data_warehouse_output\dim_usuarios.csv
+data_warehouse_output\dim_livros.csv
+data_warehouse_output\dim_avaliacoes.csv
 
 

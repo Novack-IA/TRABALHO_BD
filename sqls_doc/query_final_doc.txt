@@ -1,0 +1,73 @@
+-- =================================================================
+-- Script de Documentação do Esquema de Banco de Dados
+-- Projeto: Leitor Conectado
+-- Autor: Gustavo (com assistência do Gemini)
+-- Data: 24 de Junho de 2025
+-- =================================================================
+
+-- Ativa a extensão pgvector, necessária para a busca por similaridade.
+CREATE EXTENSION IF NOT EXISTS vector;
+
+-- -----------------------------------------------------------------
+-- Tabela: Usuarios
+-- Armazena os dados dos usuários, incluindo credenciais de login.
+-- -----------------------------------------------------------------
+CREATE TABLE Usuarios (
+    -- ID gerado automaticamente pelo banco a cada novo cadastro.
+    -- É a Chave Primária e garante a unicidade.
+    id_usuario INT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    
+    -- Colunas para o sistema de login.
+    nome VARCHAR(255),
+    email VARCHAR(255) UNIQUE NOT NULL, -- UNIQUE proíbe emails repetidos.
+    senha VARCHAR(255) NOT NULL,       -- Armazenará o hash da senha.
+
+    -- Colunas originais do dataset.
+    localizacao VARCHAR(255),
+    idade NUMERIC
+);
+
+-- -----------------------------------------------------------------
+-- Tabela: Livros
+-- Catálogo de todos os livros, incluindo o vetor para busca semântica.
+-- -----------------------------------------------------------------
+CREATE TABLE Livros (
+    -- ISBN é a Chave Primária natural do livro.
+    isbn VARCHAR(13) PRIMARY KEY,
+    
+    titulo TEXT,
+    autor VARCHAR(255),
+    ano_publicacao INT,
+    editora VARCHAR(255),
+    
+    -- Coluna vetorial para armazenar o embedding do título.
+    -- A dimensão (384) corresponde ao modelo de IA 'all-MiniLM-L6-v2'.
+    embedding vector(384)
+);
+
+-- -----------------------------------------------------------------
+-- Tabela: Avaliacoes
+-- Tabela de ligação que conecta Usuários e Livros.
+-- -----------------------------------------------------------------
+CREATE TABLE Avaliacoes (
+    -- Chaves Estrangeiras que apontam para as tabelas Usuarios e Livros.
+    id_usuario INT NOT NULL,
+    isbn_livro VARCHAR(13) NOT NULL,
+    
+    -- A nota dada pelo usuário.
+    avaliacao INT,
+
+    -- Define as restrições de Chave Estrangeira.
+    CONSTRAINT fk_usuario
+        FOREIGN KEY(id_usuario) 
+        REFERENCES Usuarios(id_usuario),
+        
+    CONSTRAINT fk_livro
+        FOREIGN KEY(isbn_livro) 
+        REFERENCES Livros(isbn),
+
+    -- Define uma Chave Primária Composta.
+    -- Isso garante que um usuário só pode ter UMA avaliação por livro
+    -- e habilita a lógica "ON CONFLICT" no app.py.
+    PRIMARY KEY (id_usuario, isbn_livro)
+);
